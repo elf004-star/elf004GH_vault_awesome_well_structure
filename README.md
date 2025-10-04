@@ -1,617 +1,286 @@
-# 井身结构图生成器
+# 井身结构图生成器 MCP 服务
 
-这是一个用于生成专业的钻井工程示意图的Python工具，包括地质分层、钻井液密度与孔隙压力曲线和井身结构。支持直井、定向井和水平井的完整绘制。
+这是一个基于 MCP (Model Context Protocol) 的井身结构图生成服务，可以根据井数据自动生成井身结构图。
 
-## 功能特点
+## 功能特性
 
-- 生成高质量的钻井工程三部分示意图
-- 支持详细的地质分层展示
-- 可视化钻井液密度和压力窗口
-- 精确绘制井身结构，包括不同尺寸的井眼和套管
-- **两步分离处理流程**：数据提取与数据映射完全分离
-- **支持多种井型**：
-  - 直井（straight well）
-  - 定向井（deviated well）
-  - 水平井（horizontal well）
-- **定向井特殊功能**：
-  - 井身结构绘图区自动扩大1.5倍（9.0cm）
-  - 中轴线位置位于1/3处
-  - 井斜角度缺失时默认为45°
-  - 井斜角度≥89°时自动按水平井处理
-  - 备注和图例位置自动调整
-- **水平井特殊功能**：
-  - 自动设置井斜角为90度
-  - 造斜段结束后绘制水平延长段
-  - 井身结构绘图区自动扩大2倍（12.0cm）
-  - 中轴线位置位于1/3处
-  - 套管备注位置特殊处理：当套管底深超过A靶点时，备注位置显示在造斜点处
-- **导眼辅助线功能**（仅水平井和定向井）：
-  - 以造斜点以上中轴线为基准绘制竖直虚线
-  - 可自定义起始深度、结束深度和直径
-  - 支持普通模式（灰色细虚线）和高亮模式（黑色粗长虚线）
-  - 自动进行深度映射和直径缩放
-  - 可通过display参数控制显示/隐藏
-- 自动调整图表比例以适应不同井深
-- 智能备注位置调整
-- **数据验证与自动计算**：
-  - 支持AB点距离自动计算和按比例映射
-  - 支持几何关系计算（造斜点、目标点A、A点垂深）
-  - 支持kickoffPoint_m备选值机制
-  - 井斜角度智能默认值设置
-- **图例显示控制**：可通过legendConfig配置各图例的显示/隐藏
-- **地层映射增强**：支持超出地层范围的深度按比例映射
-- **Markdown报告生成**：自动生成简洁版Markdown报告
-- 输出高分辨率PNG图像
-
-## 使用要求
-
-- Python 3.6+
-- 依赖库：
-  - matplotlib >= 3.5.0
-  - pandas >= 1.3.0
-  - numpy >= 1.20.0
-  - json（Python标准库）
-  - csv（Python标准库）
-
-## 快速开始（Windows用户）
-
-1. 确保已安装 Python 3.6+
-2. 准备好 `well_data.json` 数据文件
-3. 双击运行 `start.bat`
-4. 等待程序自动完成，查看生成的 `well_structure_plot.png`
-
-**说明**：`start.bat` 会自动处理虚拟环境和依赖安装，无需手动配置。
-
-## 手动安装依赖
-
-如果不使用 `start.bat`，需要手动安装依赖：
-
-```bash
-pip install -r requirements.txt
-```
+- 支持三种基本井型：直井、水平井、定向井，支持直改平和侧钻井转换
+- 自动生成井身结构图（PNG格式）
+- 生成相关数据文件（CSV格式）
+- 返回简化的图片路径（大幅减少token消耗，仅支持path格式）
+- 自动文件归档管理（时间戳文件夹）
+- 完整的错误处理和验证
 
 ## 使用方法
 
-### 方法一：使用启动脚本（最简单，Windows推荐）
+### 启动MCP服务
 
-**Windows系统**：
-双击运行 `start.bat` 批处理文件，脚本会自动：
-- 检查Python环境
-- 创建/激活虚拟环境
-- 安装/更新依赖包
-- 运行主程序生成井身结构图
-
-或在命令行中执行：
-```cmd
-start.bat
-```
-
-### 方法二：使用主程序（跨平台）
-
-**直接运行**：
 ```bash
+# 使用uv运行（推荐）
+uv run python main.py
+
+# 或直接使用python
 python main.py
 ```
 
-**指定JSON文件路径**：
-```bash
-python main.py well_data.json
+### MCP客户端配置
+
+在MCP客户端中添加以下配置：
+
+```json
+{
+  "mcpServers": {
+    "well-structure-generator": {
+      "command": "python",
+      "args": ["main.py"],
+      "cwd": "项目路径"
+    }
+  }
+}
 ```
 
-主程序会自动执行两步处理流程：
-1. **第一步（数据提取）**：提取原始数据生成 `*_raw.csv` 文件
-2. **第二步（数据映射）**：进行映射计算生成完整的映射数据文件
-3. **第三步（绘图）**：调用绘图程序生成井身结构图
+### MCP工具调用
 
-## 数据处理流程详解
+工具名称：`generate_well_structure`
 
-### 两步分离处理机制
+参数：
+- `well_data`: 井数据JSON对象（必需）
 
-本程序实现了数据提取和数据映射的严格分离，确保数据处理的透明性和可追溯性。
+返回：
+- 成功时返回简化的图片路径（<1200 token，仅支持path格式）
+- 失败时返回错误信息
 
-#### 第一步：原始数据提取
-
-从 `well_data.json` 中**纯粹提取**原始数据，生成 `*_raw.csv` 文件。
-
-**核心原则：**
-- ✅ 只提取JSON中存在的数据
-- ✅ 跳过null值和空值
-- ✅ 不进行任何计算
-- ✅ 不进行任何验证
-- ✅ 不进行任何转换
-- ✅ 保持原始单位（m、mm、deg等）
-
-**生成文件：**
-- `stratigraphy_raw.csv` - 地层原始数据
-- `drilling_fluid_pressure_raw.csv` - 钻井液与压力原始数据
-- `deviationData_raw.csv` - 井斜原始数据
-- `hole_sections_raw.csv` - 井眼段原始数据
-- `casing_sections_raw.csv` - 套管段原始数据
-
-#### 第二步：数据映射与计算
-
-从 `*_raw.csv` 文件读取数据，进行映射计算和数据补全。
-
-**处理内容：**
-- ✅ 读取原始CSV数据
-- ✅ 进行数据验证
-- ✅ 计算缺失值（几何关系、AB距离等）
-- ✅ 进行地层深度映射
-- ✅ 单位转换为cm（角度除外，保持deg）
-- ✅ 添加详细的备注列说明数据来源
-
-**生成文件：**
-- `stratigraphy.csv` - 地层映射数据
-- `drilling_fluid_pressure.csv` - 钻井液与压力映射数据
-- `deviationData.csv` - 井斜映射数据（含3列：数值_m、直接映射_cm、映射值_cm）
-- `hole_sections.csv` - 井眼段映射数据
-- `casing_sections.csv` - 套管段映射数据
-
-### 井斜数据的三列输出格式
-
-`deviationData.csv` 采用特殊的三列格式，清晰展示数据的处理过程：
-
-| 列名 | 说明 | 示例 |
-|------|------|------|
-| `数值_m` | 原始数值（单位m），null的保持null | `4000.0` 或 `null` |
-| `直接映射_cm` | 只对有原始值的进行地层映射，null的保持null | `8.9702` 或 `null` |
-| `映射值_cm` | 通过几何关系补全的最终映射值（包含默认值） | `10.8382` 或 `45.0` |
-
-**示例：**
-```csv
-参数名称,数值_m,直接映射_cm,映射值_cm,单位,备注
-造斜点深度,4000.0,8.9702,8.9702,m,由地层映射
-井斜角度,null,null,45.0,deg,原始数据缺失，定向井默认设置为45°
-目标点A深度,5000.0,11.0451,11.0451,m,由地层映射
-A点垂深,null,null,10.8382,m,通过几何关系计算（使用直接映射后的造斜点深度、井斜角度和A点深度）
-AB点距离,1000.0,2.2366,4.1745,m,按目标点B (映射值15.2195cm / 原始值6805m)的比例映射
+**返回格式**：
+```
+井身结构示意图为：
+![PNG](文件夹绝对路径+well_structure_plot.png)
 ```
 
-## 数据格式
-
-数据文件采用JSON格式，包含以下主要部分：
-
-1. **井基本信息**：
-   - `wellName`: 井名
-   - `totalDepth_m`: 总井深（米）
-   - `wellType`: 井类型（"straight well"、"deviated well"、"horizontal well"）
-
-2. **井眼轨迹数据**（`deviationData`）：
-   - `kickoffPoint_m`: 造斜点深度（米）
-   - `deviationAngle_deg`: 井斜角度（度，可为null，定向井默认45°）
-   - `targetPointA_m`: 目标点A深度（米）
-   - `targetPointA_verticalDepth_m`: A点垂深（米）
-   - `targetPointB_m`: 目标点B深度（米）
-   - `DistanceAB_m`: AB点距离（米，可按比例映射）
-   - `REAL_kickoffPoint_m`: 真实造斜点深度（米）
-
-3. **地质分层数据**（`stratigraphy`）：各地层的名称和深度范围
-
-4. **钻井液与压力数据**（`drillingFluidAndPressure`）：各深度段的钻井液密度和压力窗口
-
-5. **井身结构数据**（`wellboreStructure`）：
-   - `holeSections`: 井眼段的尺寸和深度信息
-   - `casingSections`: 套管段的尺寸和深度信息
-   - `pilotHoleGuideLine`（可选）: 导眼辅助线配置
-     - `topDepth_m`: 起始井深（米，可为null则使用造斜点深度的映射值）
-     - `bottomDepth_m`: 结束井深（米，可为null则使用totalDepth_m或地层最大深度）
-     - `diameter_mm`: 直径（毫米）
-     - `display`: 是否显示（true/false）
-     - `highlight`: 是否高亮显示（true/false，可选）
-
-6. **图例配置**（`legendConfig`，可选）：
-   - `casingLegend`: 套管图例显示（true/false，默认true）
-   - `holeLegend`: 井筒图例显示（true/false，默认true）
-   - `kickoffLegend`: 造斜点图例显示（true/false，默认true）
-   - `targetPointsLegend`: AB靶点图例显示（true/false，默认true）
-
-详细格式请参考`well_data.json`示例文件。
-
-## 井类型说明
-
-### 直井（Straight Well）
-- 井眼轨迹为垂直方向
-- **自动设置默认值**：
-  - `deviationAngle_deg` = 0°
-  - `kickoffPoint_m` = `totalDepth_m`
-  - `targetPointA_m` = `totalDepth_m`
-  - `targetPointA_verticalDepth_m` = `totalDepth_m`
-  - `REAL_kickoffPoint_m` = `totalDepth_m`
-  - `targetPointB_m` = `totalDepth_m`
-  - `DistanceAB_m` = 0
-- **跳过数据验证**：直井模式下不进行井眼轨迹数据检查
-
-### 定向井（Deviated Well）
-- 包含造斜段和稳斜段
-- 需要完整的井眼轨迹数据
-- **井斜角度智能处理**：
-  - 如果 `deviationAngle_deg` 缺失或为null → 自动设置为 **45°**
-  - 如果 `deviationAngle_deg` ≤ 1°（包括负数）→ 自动按 **30°** 处理
-  - 如果 `deviationAngle_deg` ≥ 89° → 自动按**水平井**处理（绘图区扩大2倍）
-  - 其他角度 → 按常规定向井处理（绘图区扩大1.5倍）
-- **特殊处理**：
-  - 井身结构绘图区自动扩大1.5倍（9.0cm）
-  - 中轴线位置位于1/3处
-  - 备注和图例位置自动调整
-
-### 水平井（Horizontal Well）
-- 自动将井斜角度设置为90度
-- 造斜段结束后绘制水平延长段
-- **特殊处理**：
-  - 井身结构绘图区域自动扩大2倍（12.0cm）
-  - 中轴线位置位于1/3处
-  - 备注和图例位置自动调整
-
-## 数据验证与自动计算功能
-
-### 井斜角度智能默认值
-
-程序会根据井类型自动设置井斜角度的默认值：
-
-| 井类型 | 缺失/null时的默认值 | 说明 |
-|--------|---------------------|------|
-| straight well | 0° | 垂直井眼 |
-| deviated well | 45° | 典型定向井角度 |
-| horizontal well | 90° | 水平井眼 |
-
-**定向井特殊规则**：
-- 当井斜角度 ≥ 89° 时 → 自动按 `horizontal well` 处理（绘图区扩大2倍）
-- 当井斜角度 ≤ 1°（包括负数）时 → 自动按 30° 处理
-
-### AB点距离映射与计算
-
-程序支持AB点距离的多种处理方式：
-
-#### 1. 原始数据存在时：按比例映射
-
-当JSON中 `DistanceAB_m` 不为null时，按地层映射比例进行映射：
-
-```
-映射比例 = 目标点B映射值 / 目标点B原始深度（优先）
-         或 目标点A映射值 / 目标点A原始深度（备选）
-
-AB距离直接映射 = AB距离原始值 × 映射比例
-AB距离映射值 = AB距离直接映射
+**返回数据结构**：
+```json
+{
+  "success": true,
+  "response": "井身结构示意图为：\n![PNG](图片绝对路径)",
+  "notice": "注意，必须将上面这项<response>包含在最终回答中",
+  "well_info": {
+    "well_name": "井名",
+    "well_type": "井型", 
+    "total_depth": 深度
+  },
+  "archive_folder": "2025-10-03_11-37-29",
+  "image_path": "图片的绝对路径"
+}
 ```
 
-**示例：**
-```
-原始值：1000m
-目标点B：6805m → 15.2195cm，比例 = 15.2195 / 6805 = 0.002237
-AB距离映射：1000 × 0.002237 = 2.2366cm
-```
+**Token优化**：
+- 返回内容大幅简化，减少token消耗
+- 每次返回不超过1200个token
+- 移除冗长的报告内容，只保留核心信息
 
-#### 2. 原始数据缺失时：通过A、B点计算
+### 支持的井型
 
-当JSON中 `DistanceAB_m` 为null时，通过目标点映射值计算：
+#### 基本井型定义
 
-```
-AB距离映射值 = |目标点B映射值 - 目标点A映射值|
-直接映射_cm = null（保持null）
-```
+1. **直井** (`straight well`)
+   - `deviationAngle_deg: 0`
+   - `kickoffPoint_m: null`
+   - `targetPointA_m: null`
+   - `targetPointB_m: null`
+   - `DistanceAB_m: null`
 
-### 几何关系计算
+2. **定向井** (`deviated well`)
+   - `deviationAngle_deg: 0 < 角度 < 90`
+   - `kickoffPoint_m: 有值`（造斜点深度（可根据作图情况调整））
+   - `targetPointA_m: 有值`（目标点A井深）
+   - `targetPointA_verticalDepth_m: 有值`（目标点A的垂深）,
+   - `targetPointB_m: 有值`（目标点B井深）
+   - `DistanceAB_m: 有值`（AB点间距离）
+   - `REAL_kickoffPoint_m: 有值`（实际造斜点）
 
-支持造斜点、目标点A深度、A点垂深之间的几何关系计算：
+3. **水平井** (`horizontal well`)
+   - `deviationAngle_deg: 90`
+   - `kickoffPoint_m: 有值`（造斜点深度（可根据作图情况调整））
+   - `targetPointA_m: 有值`（目标点A井深）
+   - `targetPointA_verticalDepth_m: 有值`（目标点A的垂深）,
+   - `targetPointB_m: 有值`（目标点B井深）
+   - `DistanceAB_m: 有值`（AB点间距离）
+   - `REAL_kickoffPoint_m: 有值`（实际造斜点）
 
-**关系式：**
-- `R = (目标点A深度 - 造斜点深度) / θ`
-- `目标点A深度 = R × θ + 造斜点深度`
-- `A点垂深 = R × sin(θ) + 造斜点深度`
+#### 井型转换规则
 
-其中：
-- `R`: 辅助圆半径（映射空间）
-- `θ`: 井斜角度（弧度）
+当 `wellType` 为 `horizontal well` 或 `deviated well` 时，如果配置了 `pilotHoleGuideLine` 并设置 `"side_tracking": true`，则可以表示：
 
-**自动计算**：已知任意两个值（使用直接映射后的值），可计算第三个值。
+- **直改平井**：从直井段开始，在指定深度开始造斜
+- **侧钻井**：从现有井眼侧向钻出新的井眼
 
-**重要原则**：所有几何关系计算都使用**直接映射后的值**进行，确保在映射空间中保持几何一致性。
-
-### 绘图坐标计算
-
-绘图时A点坐标的计算方法：
-
-1. **辅助圆半径**：`R = (A点垂深 - 造斜点深度) / sin(井斜角)`
-2. **辅助圆圆心**：`(造斜点横坐标 + R, 造斜点深度)`
-3. **A点坐标**：从造斜点开始，绕圆心逆时针旋转井斜角度
-
-所有计算使用 `映射值_cm` 列的数据（包含默认值和计算值）。
-
-### kickoffPoint_m备选值机制
-
-当`kickoffPoint_m`为null或空时，按以下顺序尝试备选值：
-
-1. `REAL_kickoffPoint_m`
-2. `totalDepth_m`（从well_data.json读取）
-3. `0`（默认值）
-
-### 地层映射增强
-
-- **范围外映射**：当深度超出地层范围时，按最深层位的厚度比例进行映射
-- **比例计算**：`映射值 = 最深层映射底部 + (深度 - 最深层底部) × (最深层映射厚度 / 最深层实际厚度)`
-
-## 单位转换规则
-
-### 深度和长度
-- 输入单位：米 (m)
-- 输出单位：厘米 (cm)
-- 转换比例：1m = 100cm
-
-### 直径和外径
-- 输入单位：毫米 (mm)
-- 输出单位：厘米 (cm)
-- 转换比例：1mm = 0.1cm
-- 映射缩放：实际值 / 20
-
-### 角度
-- 输入单位：度 (deg)
-- 输出单位：度 (deg)
-- **不进行转换**
-
-### 密度
-- 输入单位：g/cm³
-- 输出单位：g/cm³
-- **保持不变**
-
-## 备注列说明
-
-映射后的CSV文件都包含"备注"列，详细说明数据来源：
-
-### 1. 直接地层映射
-```
-由地层映射
-```
-表示该数据直接通过地层深度映射得到。
-
-### 2. 比例映射
-```
-按目标点B (映射值15.2195cm / 原始值6805m)的比例映射
-```
-表示该数据按指定比例映射得到。
-
-### 3. 几何关系计算
-```
-通过几何关系计算（使用直接映射后的造斜点深度、井斜角度和A点深度）
-```
-表示该数据通过几何关系从其他映射值计算得到。
-
-### 4. 默认值设置
-```
-原始数据缺失，定向井默认设置为45°
-```
-表示原始数据缺失，使用了根据井类型确定的默认值。
-
-### 5. 差值计算
-```
-由目标点B映射值 - 目标点A映射值计算得到
-```
-表示该数据通过其他映射值相减得到。
-
-## 程序架构
-
-### main.py - 主程序
-
-`main.py` 是整合了所有功能的主程序，包含：
-
-- **StratigraphyExtractor**: 地层数据提取器
-- **DrillingFluidExtractor**: 钻井液数据提取器
-- **DeviationDataExtractor**: 井眼轨迹数据提取器
-- **HoleSectionsExtractor**: 井筒段数据提取器
-- **CasingSectionsExtractor**: 套管段数据提取器
-- **WellStructurePlotPipeline**: 流水线控制器
-
-**执行流程**：
-1. **第一步**：提取所有原始数据（stratigraphy必须先执行）
-2. **第二步**：映射所有数据（进行验证、计算、单位转换）
-3. **第三步**：调用 `well_structure_plot.py` 生成井身结构图
-
-**优点**：
-- 一键运行，无需手动执行多个脚本
-- 自动检查文件生成状态
-- 完整的错误处理和进度提示
-- 代码整合，易于维护和分发
-
-### well_structure_plot.py - 绘图模块
-
-负责读取映射后的CSV文件并生成井身结构图。
-
-**关键特性**：
-- 使用 `映射值_cm` 列进行所有计算（包含默认值和计算值）
-- 根据井类型自动调整绘图区宽度
-- 智能识别井斜角度≥89°的定向井并按水平井处理
-- 精确计算A点坐标（使用辅助圆和A点垂深）
-
-### start.bat - 启动脚本（Windows）
-
-Windows批处理启动脚本，提供一键运行功能：
-
-**执行步骤**：
-1. 检查Python环境是否已安装
-2. 自动创建虚拟环境（如不存在）
-3. 激活虚拟环境
-4. 安装/更新依赖包（从requirements.txt）
-5. 运行main.py主程序
-
-**优点**：
-- 🚀 一键启动，无需配置
-- 📦 自动管理虚拟环境
-- 🔄 自动安装/更新依赖
-- 💬 友好的中文提示信息
-- ✅ 完整的错误检查
-
-## 文件结构
-
-### 输入文件
-- `well_data.json` - 井数据配置文件（必需）
-
-### 核心程序
-- `start.bat` - Windows一键启动脚本 ⭐推荐
-- `main.py` - 主程序，整合所有功能
-- `well_structure_plot.py` - 绘图模块
-
-### 原始数据文件（自动生成）
-- `stratigraphy_raw.csv` - 地层原始数据
-- `drilling_fluid_pressure_raw.csv` - 钻井液原始数据
-- `deviationData_raw.csv` - 井斜原始数据
-- `hole_sections_raw.csv` - 井眼段原始数据
-- `casing_sections_raw.csv` - 套管段原始数据
-
-### 映射数据文件（自动生成）
-- `stratigraphy.csv` - 地层映射数据
-- `drilling_fluid_pressure.csv` - 钻井液映射数据
-- `deviationData.csv` - 井斜映射数据（含3列：数值_m、直接映射_cm、映射值_cm）
-- `hole_sections.csv` - 井眼段映射数据
-- `casing_sections.csv` - 套管段映射数据
-
-### 输出文件
-- `well_structure_plot.png` - 最终的井身结构图 🎨
-
-## 图形尺寸说明
-
-根据井类型，生成的图形尺寸会有所不同：
-- **直井**：11.123cm × 11.518cm（井身结构绘图区6.0cm + 右侧边距）
-- **定向井**：14.123cm × 11.518cm（井身结构绘图区9.0cm + 右侧边距）
-- **水平井/定向井≥89°**：17.123cm × 11.518cm（井身结构绘图区12.0cm + 右侧边距）
-
-**注意**：所有图形都会在右侧自动增加原宽度1/60的边距，为套管备注提供更好的显示空间。
-
-## 备注和图例位置
-
-程序会根据井类型自动调整备注和图例的位置：
-- **井筒备注**：可通过`legendConfig.holeLegend`控制显示/隐藏
-- **套管备注**：可通过`legendConfig.casingLegend`控制显示/隐藏
-  - 直井和定向井：固定在中轴线和右边框线的1/2处，左对齐
-  - 水平井：当套管底深超过A靶点时，备注位置显示在造斜点处；其他情况按常规处理
-- **关键点图例**：可通过`legendConfig.targetPointsLegend`和`legendConfig.kickoffLegend`控制显示/隐藏
-  - 位置：固定在左边框线和中轴线的1/2处，右对齐
-  - 顺序：B点（大深度）在上，A点（小深度）在下，造斜点在底部
-
-## 导眼辅助线功能详解
-
-导眼辅助线用于在水平井和定向井中标识预先钻孔的引导轨迹。此功能仅在`wellType`为`"horizontal well"`或`"deviated well"`时生效。
-
-### 配置说明
-
-在`well_data.json`的`wellboreStructure`中添加`pilotHoleGuideLine`对象：
+#### pilotHoleGuideLine 配置示例
 
 ```json
 "pilotHoleGuideLine": {
-  "topDepth_m": 2600,
-  "bottomDepth_m": 5150,
-  "diameter_mm": 220,
-  "display": true,
-  "highlight": true
+  "topDepth_m": 4530,        // 导眼井段起始深度
+  "bottomDepth_m": 5150,      // 导眼井段结束深度
+  "diameter_mm": 215.9,       // 导眼井段直径
+  "display": true,            // 是否显示导眼井段
+  "highlight": true,          // 是否高亮显示
+  "side_tracking": true       // 是否为侧钻井
 }
 ```
 
-### 参数说明
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `topDepth_m` | number/null | 否 | 导眼起始井深（米）。如为null，使用造斜点深度的映射值 |
-| `bottomDepth_m` | number/null | 否 | 导眼结束井深（米）。如为null，使用totalDepth_m；如果totalDepth_m也缺失，使用地层数据中最大的bottomDepth_m |
-| `diameter_mm` | number | 是 | 导眼直径（毫米） |
-| `display` | boolean | 是 | 是否显示导眼辅助线 |
-| `highlight` | boolean | 否 | 是否使用高亮样式（默认false） |
-
-**默认值逻辑：**
-- `topDepth_m` 缺失或为null → 使用**造斜点深度的映射值**
-- `bottomDepth_m` 缺失或为null → 优先使用 `totalDepth_m`，如果 `totalDepth_m` 也缺失，使用**地层数据中最大的 bottomDepth_m**
-
-### 显示模式
-
-**普通模式** (`highlight: false`或省略)：
-- 颜色：灰色
-- 线宽：1.0
-- 虚线样式：短虚线 (5, 3)
-- 透明度：0.7
-
-**高亮模式** (`highlight: true`)：
-- 颜色：黑色
-- 线宽：0.83
-- 虚线样式：长虚线 (2.5, 1.25)
-- 透明度：1.0（不透明）
-
-### 绘制规则
-
-1. 导眼辅助线始终以**造斜点以上的中轴线位置**为基准
-2. 绘制两条竖直的虚线，关于中轴线对称
-3. 虚线从起始深度垂直向下延伸至结束深度
-4. 直径会根据地层映射规则自动缩放（÷10÷20）
-5. 深度会根据地层厚度进行映射转换
-
-## 自定义
-
-### 图形样式自定义
-- 可以通过修改`StratigraphyPlotter`类中的颜色设置来自定义图表颜色
-- 可以调整图形尺寸和比例参数
-- 支持中文字体显示
-- 导眼辅助线的样式参数可在`draw_pilot_hole_guide_line()`方法中调整
-
-### 图例显示控制
-通过`well_data.json`中的`legendConfig`配置各图例的显示/隐藏：
+#### legendConfig 图例配置示例
 
 ```json
 "legendConfig": {
-  "casingLegend": true,      // 套管图例
-  "holeLegend": false,       // 井筒图例
-  "kickoffLegend": true,     // 造斜点图例
-  "targetPointsLegend": true // AB靶点图例
+  "casingLegend": true,        // 是否显示套管图例
+  "holeLegend": false,         // 是否显示井眼图例
+  "kickoffLegend": true,       // 是否显示造斜点图例
+  "targetPointsLegend": true   // 是否显示目标点图例
 }
 ```
 
-## 常见问题
+## 生成的文件
 
-### Q1: 井斜角度缺失怎么办？
-**A**: 程序会根据井类型自动设置默认值：
-- 直井：0°
-- 定向井：45°
-- 水平井：90°
+每次请求完成后，所有生成的文件会自动移动到以时间戳命名的文件夹中：
 
-### Q2: 定向井角度接近90度但不是水平井怎么办？
-**A**: 当定向井的井斜角度≥89°时，程序会自动按水平井处理，扩大绘图区至12.0cm。
+- `well_structure_plot.png`: 井身结构图
+- `well_structure_report.md`: 井身结构报告
+- `stratigraphy.csv`: 地层数据
+- `casing_sections.csv`: 套管数据
+- `hole_sections.csv`: 井眼数据
+- `drilling_fluid_pressure.csv`: 钻井液压力数据
+- `deviationData.csv`: 偏移数据
+- 对应的 `*_raw.csv` 原始数据文件
 
-### Q3: AB点距离如何映射？
-**A**: 
-- 如果原始数据存在：按目标点B（或A）的映射比例进行比例映射
-- 如果原始数据缺失：通过目标点B和A的映射值相减计算
+**文件归档**：
+- 文件夹命名格式：`YYYY-MM-DD_HH-MM-SS`
+- 示例：`2025-10-03_11-37-29`
+- 每次请求都会创建新的归档文件夹
 
-### Q4: 几何关系计算使用什么数据？
-**A**: 所有几何关系计算都使用**直接映射后的值**（`直接映射_cm`列），确保在映射空间中保持几何一致性。
+## 技术实现
 
-### Q5: 如何理解三列输出格式？
-**A**: 
-- `数值_m`: 原始值，null保持null
-- `直接映射_cm`: 只映射有原始值的，null保持null
-- `映射值_cm`: 包含计算值和默认值的最终结果
+- 使用 FastMCP 框架
+- 支持异步处理
+- 完整的错误处理机制
+- 自动文件备份和清理
+- 3秒延迟确保程序完全结束
+- Token优化，减少API调用成本
 
-### Q6: 绘图时为什么出现nan？
-**A**: 请确保绘图程序读取的是 `映射值_cm` 列，该列包含了所有默认值和计算值。
+## 模板文件
 
-### Q7: 定向井角度很小（接近0°）会怎么处理？
-**A**: 
-- 如果角度 ≤ 1°（包括0°和负数）→ 自动按30°处理（避免角度过小导致计算异常）
-- 如果角度在 1° ~ 89° 之间 → 按实际角度处理
-- 如果角度 ≥ 89° → 按水平井处理（绘图区扩大至12.0cm）
+项目提供了四种井型的设计模板，位于 `templates/` 目录：
 
-## 更新日志
+- `well_data（导眼井）.json` - 直井设计模板
+- `well_data（导向井） .json` - 定向井设计模板  
+- `well_data（水平井）.json` - 水平井设计模板
+- `well_data（直改平）.json` - 直改平井设计模板
 
-### 2025-10-02
-- ✅ 实现数据提取和映射的严格两步分离
-- ✅ 新增井斜数据三列输出格式（数值_m、直接映射_cm、映射值_cm）
-- ✅ 新增井斜角度智能默认值（定向井45°）
-- ✅ 新增定向井角度≥89°自动按水平井处理
-- ✅ 新增定向井角度≤1°自动按30°处理
-- ✅ 新增AB点距离按比例映射功能
-- ✅ 修复绘图时使用映射值_cm列进行计算
-- ✅ 优化几何关系计算使用直接映射值
-- ✅ 完善A点坐标计算方法（辅助圆+A点垂深）
-- ✅ 增强备注列信息（显示计算公式和数值来源）
+这些模板文件展示了不同井型的标准数据结构和参数配置，可以作为设计新井的参考。
 
-## 技术支持
+## 数据结构设计要求
 
-如有问题或建议，请参考代码注释或联系开发者。
+### stratigraphy（地层数据）
 
-## 许可证
+地层数据定义了井眼穿过的各个地质层位信息：
 
-本项目仅供学习和研究使用。
+```json
+"stratigraphy": [
+  {
+    "name": "遂宁组",           // 地层名称
+    "topDepth_m": 0,           // 地层顶深（米）
+    "bottomDepth_m": 45        // 地层底深（米）
+  },
+  {
+    "name": "沙溪庙组",
+    "topDepth_m": 45,
+    "bottomDepth_m": 1195
+  }
+  // ... 更多地层
+]
+```
+
+**设计要求：**
+- 地层必须按深度顺序排列，从浅到深
+- 相邻地层的深度必须连续（上一个地层的底深 = 下一个地层的顶深）
+- 最后一个地层的底深应等于或接近 `totalDepth_m`
+- 地层名称使用标准地质术语
+
+### drillingFluidAndPressure（钻井液压力数据）
+
+钻井液压力数据定义了不同深度段的压力参数：
+
+```json
+"drillingFluidAndPressure": [
+  {
+    "topDepth_m": 0,                    // 压力段顶深（米）
+    "bottomDepth_m": 50,                 // 压力段底深（米）
+    "porePressure_gcm3": 1.00,          // 孔隙压力（g/cm³）
+    "pressureWindow_gcm3": {             // 压力窗口
+      "min": 1.05,                       // 最小压力（g/cm³）
+      "max": 1.10                        // 最大压力（g/cm³）
+    }
+  }
+  // ... 更多压力段
+]
+```
+
+**设计要求：**
+- 压力段必须按深度顺序排列，从浅到深
+- 相邻压力段的深度必须连续
+- 孔隙压力值应在地质上合理
+- 压力窗口的最小值应大于孔隙压力
+- 压力段数量通常少于地层数量，可以合并相似压力特征的地层
+
+### wellboreStructure（井身结构）
+
+井身结构定义了井眼和套管的几何参数：
+
+```json
+"wellboreStructure": {
+  "holeSections": [                     // 井眼段
+    {
+      "topDepth_m": 0,                  // 井眼段顶深（米）
+      "bottomDepth_m": 50,               // 井眼段底深（米）
+      "diameter_mm": 660.4,             // 井眼直径（毫米）
+      "note_in": "26\""                  // 备注（英寸）
+    }
+    // ... 更多井眼段
+  ],
+  "casingSections": [                   // 套管段
+    {
+      "topDepth_m": 0,                  // 套管顶深（米）
+      "bottomDepth_m": 50,               // 套管底深（米）
+      "od_mm": 508,                      // 套管外径（毫米）
+      "note_in": "20\""                  // 备注（英寸）
+    }
+    // ... 更多套管段
+  ],
+  "pilotHoleGuideLine": {               // 导眼井段（可选）
+    "topDepth_m": 4530,                 // 导眼井段顶深（米）
+    "bottomDepth_m": 5150,              // 导眼井段底深（米）
+    "diameter_mm": 215.9,               // 导眼井段直径（毫米）
+    "display": true,                    // 是否显示
+    "highlight": true,                  // 是否高亮
+    "side_tracking": true               // 是否为侧钻井
+  }
+}
+```
+
+**设计要求：**
+
+#### holeSections（井眼段）
+- 井眼段必须按深度顺序排列，从浅到深
+- 相邻井眼段的深度必须连续
+- 井眼直径通常从上到下递减
+- 最后一个井眼段的底深应等于 `totalDepth_m`
+
+#### casingSections（套管段）
+- 套管段必须按深度顺序排列，从浅到深
+- 套管顶深通常为0（从井口开始）
+- 当套管顶深不为0，会给顶深增加一个悬挂器
+- 套管外径通常从上到下递减
+- 套管底深应小于等于对应井眼段的底深
+
+#### pilotHoleGuideLine（导眼井段）
+- 仅在直改平井或侧钻井中使用
+- `topDepth_m` 和 `bottomDepth_m` 定义导眼井段范围
+- `diameter_mm` 应与对应井眼段直径一致
+- `side_tracking: true` 表示侧钻井特征

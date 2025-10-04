@@ -1,3 +1,16 @@
-matplotlib>=3.5.0
-numpy>=1.20.0
-pandas>=1.3.0
+# 井身结构图生成器 MCP 服务依赖
+# 基于 main.py 分析生成的依赖列表
+
+# MCP (Model Context Protocol) 框架
+mcp[cli]>=1.16.0
+
+# 注意：以下模块为Python标准库，无需安装
+# - json
+# - subprocess  
+# - os
+# - shutil
+# - time
+# - glob
+# - pathlib
+# - typing
+# - datetime

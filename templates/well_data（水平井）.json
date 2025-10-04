@@ -1,0 +1,70 @@
+{
+  "wellName": "资201H3-3",
+  "totalDepth_m": 6866,
+  "wellType": "horizontal well",
+  "deviationData": {
+    "kickoffPoint_m": 3060,
+    "deviationAngle_deg": 90,
+    "targetPointA_m": 5090,
+    "targetPointA_verticalDepth_m": 4825,
+    "targetPointB_m": 6890,
+    "DistanceAB_m": 1800,
+    "REAL_kickoffPoint_m": 3060
+  },
+  "stratigraphy": [
+    {"name": "遂宁组", "topDepth_m": 0, "bottomDepth_m": 150},
+    {"name": "沙溪庙组", "topDepth_m": 150, "bottomDepth_m": 1112},
+    {"name": "凉高山组", "topDepth_m": 1112, "bottomDepth_m": 1248},
+    {"name": "大安寨段", "topDepth_m": 1248, "bottomDepth_m": 1336},
+    {"name": "马鞍山段", "topDepth_m": 1336, "bottomDepth_m": 1352},
+    {"name": "东岳庙段", "topDepth_m": 1352, "bottomDepth_m": 1400},
+    {"name": "珍珠冲段", "topDepth_m": 1400, "bottomDepth_m": 1492},
+    {"name": "须家河组", "topDepth_m": 1492, "bottomDepth_m": 2036},
+    {"name": "雷口坡组", "topDepth_m": 2036, "bottomDepth_m": 2452},
+    {"name": "嘉陵江组", "topDepth_m": 2452, "bottomDepth_m": 3028},
+    {"name": "飞仙关组", "topDepth_m": 3028, "bottomDepth_m": 3453},
+    {"name": "长兴组", "topDepth_m": 3453, "bottomDepth_m": 3540},
+    {"name": "龙潭组", "topDepth_m": 3540, "bottomDepth_m": 3660},
+    {"name": "茅口坡组", "topDepth_m": 3660, "bottomDepth_m": 3891},
+    {"name": "栖霞组", "topDepth_m": 3891, "bottomDepth_m": 4011},
+    {"name": "梁山组", "topDepth_m": 4011, "bottomDepth_m": 4019},
+    {"name": "湄潭组～桐梓组", "topDepth_m": 4019, "bottomDepth_m": 4032},
+    {"name": "洗象池组", "topDepth_m": 4032, "bottomDepth_m": 4093},
+    {"name": "高台组", "topDepth_m": 4093, "bottomDepth_m": 4179},
+    {"name": "龙王庙组", "topDepth_m": 4179, "bottomDepth_m": 4269},
+    {"name": "沧浪铺组", "topDepth_m": 4269, "bottomDepth_m": 4500},
+    {"name": "筇竹寺组", "topDepth_m": 4500, "bottomDepth_m": 4839}
+  ],
+  "drillingFluidAndPressure": [
+    {"topDepth_m": 0, "bottomDepth_m": 150, "porePressure_gcm3": 1.085, "pressureWindow_gcm3": {"min": 1.05, "max": 1.10}},
+    {"topDepth_m": 150, "bottomDepth_m": 1195, "porePressure_gcm3": 1.085, "pressureWindow_gcm3": {"min": 1.40, "max": 1.55}},
+    {"topDepth_m": 1195, "bottomDepth_m": 1520, "porePressure_gcm3": 1.32, "pressureWindow_gcm3": {"min": 1.40, "max": 1.55}},
+    {"topDepth_m": 1520, "bottomDepth_m": 2060, "porePressure_gcm3": 1.49, "pressureWindow_gcm3": {"min": 1.52, "max": 1.60}},
+    {"topDepth_m": 2060, "bottomDepth_m": 2420, "porePressure_gcm3": 1.54, "pressureWindow_gcm3": {"min": 1.57, "max": 1.75}},
+    {"topDepth_m": 2420, "bottomDepth_m": 2735, "porePressure_gcm3": 1.555, "pressureWindow_gcm3": {"min": 1.67, "max": 1.75}},
+    {"topDepth_m": 2735, "bottomDepth_m": 4268, "porePressure_gcm3": 1.68, "pressureWindow_gcm3": {"min": 1.77, "max": 1.90}},
+    {"topDepth_m": 4268, "bottomDepth_m": 4486, "porePressure_gcm3": 1.625, "pressureWindow_gcm3": {"min": 1.77, "max": 2.02}},
+    {"topDepth_m": 4486, "bottomDepth_m": 4840, "porePressure_gcm3": 1.99, "pressureWindow_gcm3": {"min": 2.00, "max": 2.15}}
+  ],
+  "wellboreStructure": {
+    "holeSections": [
+      {"topDepth_m": 0, "bottomDepth_m": 152, "diameter_mm": 660.4, "note_in": "26\""},
+      {"topDepth_m": 152, "bottomDepth_m": 1498, "diameter_mm": 406.4, "note_in": "Φ406.4mm"},
+      {"topDepth_m": 1498, "bottomDepth_m": 4321, "diameter_mm": 311.2, "note_in": "Φ311.2mm"},
+      {"topDepth_m": 4321, "bottomDepth_m": 6950, "diameter_mm": 215.9, "note_in": "Φ215.9mm"}
+    ],
+    "casingSections": [
+      {"topDepth_m": 0, "bottomDepth_m": 150.62, "od_mm": 508, "note_in": "20\"导管"},
+      {"topDepth_m": 0, "bottomDepth_m": 1495.48, "od_mm": 346.08, "note_in": "Φ346.08mm+339.72mm"},
+      {"topDepth_m": 0, "bottomDepth_m": 4318.86, "od_mm": 247.65, "note_in": "Φ247.65mm+Φ244.5mm"},
+      {"topDepth_m": 0, "bottomDepth_m": 6945.83, "od_mm": 139.7, "note_in": "Φ139.7mm油层套管"}
+    ],
+    "pilotHoleGuideLine": null
+  },
+  "legendConfig": {
+    "casingLegend": true,
+    "holeLegend": false,
+    "kickoffLegend": true,
+    "targetPointsLegend": true
+  }
+}
