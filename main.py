@@ -16,7 +16,22 @@ from datetime import datetime
 from mcp.server.fastmcp import FastMCP
 
 # Create an MCP server
-mcp = FastMCP("WellStructureGenerator")
+mcp = FastMCP("awesome_well_MCP")
+
+
+def get_package_data_dir() -> Path:
+    """获取包数据目录路径"""
+    return Path(__file__).parent
+
+
+def get_generator_exe_path() -> Path:
+    """获取生成器exe文件路径"""
+    return get_package_data_dir() / "well_structure_generator.exe"
+
+
+def get_templates_dir() -> Path:
+    """获取模板文件目录路径"""
+    return get_package_data_dir() / "templates"
 
 
 def validate_well_data(data: Dict[str, Any]) -> bool:
@@ -62,9 +77,9 @@ def update_well_data_file(data: Dict[str, Any]) -> bool:
 def run_well_generator() -> bool:
     """启动井身结构生成器并检测PNG和报告文件生成"""
     try:
-        generator_path = Path("井身结构图生成器.exe")
+        generator_path = get_generator_exe_path()
         if not generator_path.exists():
-            print("井身结构图生成器.exe 不存在")
+            print(f"well_structure_generator.exe 不存在: {generator_path}")
             return False
         
         # 1. 启动前先清理所有生成的文件
@@ -106,6 +121,7 @@ def create_timestamp_folder() -> str:
     except Exception as e:
         print(f"创建时间戳文件夹失败: {e}")
         return ""
+
 
 def move_generated_files(folder_path: str) -> bool:
     """按顺序移动生成的文件到时间戳文件夹"""
@@ -186,6 +202,7 @@ def read_report_content(report_path: str) -> str:
     except Exception as e:
         print(f"读取报告内容失败: {e}")
         return ""
+
 
 def cleanup_generated_files():
     """清理指定的生成文件"""
@@ -420,5 +437,10 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
         }
 
 
-if __name__ == "__main__":
+def main():
+    """主入口函数"""
     mcp.run(transport='stdio')
+
+
+if __name__ == "__main__":
+    main()
