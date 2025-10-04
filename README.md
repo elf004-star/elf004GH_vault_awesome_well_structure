@@ -31,12 +31,19 @@ python main.py
 {
   "mcpServers": {
     "well-structure-generator": {
-      "command": "python",
-      "args": ["main.py"],
-      "cwd": "项目路径"
+      "isActive": true,
+      "name": "MCP 服务器（Pypi）",
+      "type": "stdio",
+      "description": "",
+      "command": "uvx",
+      "registryUrl": "",
+      "args": [
+        "awesome-well-mcp"
+      ]
     }
   }
 }
+
 ```
 
 ### MCP工具调用
