@@ -13,16 +13,6 @@
 
 ## 使用方法
 
-### 启动MCP服务
-
-```bash
-# 使用uv运行（推荐）
-uv run python main.py
-
-# 或直接使用python
-python main.py
-```
-
 ### MCP客户端配置
 
 在MCP客户端中添加以下配置：
@@ -32,7 +22,7 @@ python main.py
   "mcpServers": {
     "well-structure-generator": {
       "isActive": true,
-      "name": "MCP 服务器（Pypi）",
+      "name": "awesome well MCP",
       "type": "stdio",
       "description": "",
       "command": "uvx",
