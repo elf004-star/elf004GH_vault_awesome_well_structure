@@ -12,6 +12,9 @@ __pycache__/
 *.xlsx
 *.csv
 *.png
+*.bat
+*.sh
+*.md
 
 
 # 忽略虚拟环境
@@ -29,8 +32,11 @@ dist/
 # 忽略特定文件
 well_structure_report.md
 well_data_sample.json
+check_package.py
+quick_check.py
 
 # 排除不想被忽略的特定文件（注意要写相对路径）
+!README.md
 !统计结果模板.csv
 !well_structure_plot_sample.png
 !well_info_sample.png
