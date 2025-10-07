@@ -1,42 +1,139 @@
-# 井身结构图生成器 MCP 服务
+# Awesome Well Structure MCP 服务
 
 这是一个基于 MCP (Model Context Protocol) 的井身结构图生成服务，可以根据井数据自动生成井身结构图。
 
 ## 功能特性
 
-- 支持三种基本井型：直井、水平井、定向井，支持直改平和侧钻井转换
-- 自动生成井身结构图（PNG格式）
+- 支持四种基本井型：直井、水平井、定向井、直改平井，支持侧钻井转换
+- 自动生成井身结构图（PNG格式）和井身结构信息图
 - 生成相关数据文件（CSV格式）
 - 返回简化的图片路径（大幅减少token消耗，仅支持path格式）
 - 自动文件归档管理（时间戳文件夹）
 - 完整的错误处理和验证
+- 支持图例配置和导眼井辅助线显示
 
-## 使用方法
+## 安装和配置
 
-### MCP客户端配置
+### 方法一：通过 PyPI 包安装（推荐）
 
-在MCP客户端中添加以下配置：
+这是最简单快捷的安装方式，适合大多数用户。
+
+#### 1. 安装 Python 和 uv
+
+**安装 Python：**
+- 访问 [Python官网](https://www.python.org/downloads/) 下载并安装 Python 3.8 或更高版本
+- 安装时确保勾选 "Add Python to PATH" 选项
+
+**安装 uv：**
+```bash
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+#### 2. 配置 AI 客户端
+
+在 AI 客户端（以 Cherry Studio 为例）中添加以下配置：
 
 ```json
 {
   "mcpServers": {
-    "well-structure-generator": {
-      "isActive": true,
-      "name": "awesome well MCP",
+    "awesome-well-mcp": {
+      "name": "awesome-well-mcp",
       "type": "stdio",
-      "description": "",
       "command": "uvx",
-      "registryUrl": "",
       "args": [
         "awesome-well-mcp"
       ]
     }
   }
 }
-
 ```
 
-### MCP工具调用
+### 方法二：从 GitHub 下载源码安装
+
+适合需要自定义修改或离线使用的用户。
+
+#### 1. 下载源码
+
+从以下仓库下载源码（推荐第一个）：
+
+- **主要仓库**：[https://github.com/elf004-star/elf004GH_vault_MCP001.git](https://github.com/elf004-star/elf004GH_vault_MCP001.git)
+- **备用仓库**：[https://github.com/elf004-star/elf004GH_vault_awesome_well_structure.git](https://github.com/elf004-star/elf004GH_vault_awesome_well_structure.git)
+
+主要文件包括：
+- `WellStructure.exe` - 井身结构生成器
+- `main.py` - MCP 服务主程序
+- `pyproject.toml` - 项目配置文件
+
+#### 2. 安装 Python 和 uv
+
+**安装 Python：**
+- 访问 [Python官网](https://www.python.org/downloads/) 下载并安装 Python 3.8 或更高版本
+- 安装时确保勾选 "Add Python to PATH" 选项
+
+**安装 uv：**
+```bash
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+#### 3. 设置虚拟环境
+
+```bash
+# 进入项目目录
+cd /path/to/your/project
+
+# 使用 uv 创建虚拟环境并安装依赖
+uv sync
+```
+
+#### 4. 配置 AI 客户端
+
+在 AI 客户端（以 Cherry Studio 为例）中添加 MCP 服务器：
+
+**通过界面配置：**
+1. 打开 Cherry Studio
+2. 进入设置 → MCP 服务器
+3. 添加新的 MCP 服务器
+4. 配置如下：
+   - **类型**：标准输入输出 studio
+   - **命令**：uv
+   - **参数**：
+     ```
+     --directory
+     C:\Files\test_MCP\awesome_well（填写你的文件夹地址）
+     run
+     main.py
+     ```
+
+**通过配置文件编辑：**
+```json
+{
+  "mcpServers": {
+    "awesome-well-mcp-local": {
+      "name": "awesome-well-mcp-local",
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:\\_Git_Files\\test",
+        "run",
+        "main.py"
+      ]
+    }
+  }
+}
+```
+
+**注意：** 请将 `C:\\_Git_Files\\test` 替换为你的实际项目路径。
+
+## MCP工具调用
 
 工具名称：`generate_well_structure`
 
@@ -44,28 +141,33 @@
 - `well_data`: 井数据JSON对象（必需）
 
 返回：
-- 成功时返回简化的图片路径（<1200 token，仅支持path格式）
-- 失败时返回错误信息
+- 成功时返回简化的图片路径（<1200 token，仅支持path格式）及生成报告字典。
+- 失败时返回错误信息字典。
 
 **返回格式**：
 ```
 井身结构示意图为：
 ![PNG](文件夹绝对路径+well_structure_plot.png)
+
+井身结构信息图为：
+![PNG](文件夹绝对路径+well_info.png)
 ```
 
-**返回数据结构**：
+**返回数据结构和服务实现的底层逻辑**：
 ```json
 {
   "success": true,
-  "response": "井身结构示意图为：\n![PNG](图片绝对路径)",
-  "notice": "注意，必须将上面这项<response>包含在最终回答中",
+  "report_content": "详细的井身结构报告内容（Markdown格式）",
+  "response": "井身结构示意图为：\n![PNG](结构图绝对路径)\n\n井身结构信息图为：\n![PNG](信息图绝对路径)",
+  "notice": "注意，先整理<report_content>，必须将上面这项<response>包含在整理后的<report_content>中",
   "well_info": {
     "well_name": "井名",
     "well_type": "井型", 
     "total_depth": 深度
   },
   "archive_folder": "2025-10-03_11-37-29",
-  "image_path": "图片的绝对路径"
+  "structure_image_path": "井身结构图绝对路径",
+  "info_image_path": "井身结构信息图绝对路径"
 }
 ```
 
@@ -73,6 +175,7 @@
 - 返回内容大幅简化，减少token消耗
 - 每次返回不超过1200个token
 - 移除冗长的报告内容，只保留核心信息
+- 同时生成井身结构图和井身结构信息图
 
 ### 支持的井型
 
@@ -102,6 +205,16 @@
    - `targetPointB_m: 有值`（目标点B井深）
    - `DistanceAB_m: 有值`（AB点间距离）
    - `REAL_kickoffPoint_m: 有值`（实际造斜点）
+
+4. **直改平井** (`straight-to-horizontal well`)
+   - `deviationAngle_deg: 90`
+   - `kickoffPoint_m: 有值`（造斜点深度（可根据作图情况调整））
+   - `targetPointA_m: 有值`（目标点A井深）
+   - `targetPointA_verticalDepth_m: 有值`（目标点A的垂深）,
+   - `targetPointB_m: 有值`（目标点B井深）
+   - `DistanceAB_m: 有值`（AB点间距离）
+   - `REAL_kickoffPoint_m: 有值`（实际造斜点）
+   - 需要配置 `pilotHoleGuideLine` 并设置 `"side_tracking": true`
 
 #### 井型转换规则
 
@@ -139,12 +252,14 @@
 每次请求完成后，所有生成的文件会自动移动到以时间戳命名的文件夹中：
 
 - `well_structure_plot.png`: 井身结构图
+- `well_info.png`: 井身结构信息图
 - `well_structure_report.md`: 井身结构报告
 - `stratigraphy.csv`: 地层数据
 - `casing_sections.csv`: 套管数据
 - `hole_sections.csv`: 井眼数据
 - `drilling_fluid_pressure.csv`: 钻井液压力数据
 - `deviationData.csv`: 偏移数据
+- `location.csv`: 位置数据
 - 对应的 `*_raw.csv` 原始数据文件
 
 **文件归档**：
@@ -170,7 +285,7 @@
 - `well_data（水平井）.json` - 水平井设计模板
 - `well_data（直改平）.json` - 直改平井设计模板
 
-这些模板文件展示了不同井型的标准数据结构和参数配置，可以作为设计新井的参考。
+这些模板文件展示了不同井型的标准数据结构和参数配置，可以作为设计新井的参考。每个模板都包含了完整的井身结构数据、地层信息、钻井液压力数据和图例配置。
 
 ## 数据结构设计要求
 
@@ -272,8 +387,10 @@
 #### casingSections（套管段）
 - 套管段必须按深度顺序排列，从浅到深
 - 套管顶深通常为0（从井口开始）
-- 当套管顶深不为0，会给顶深增加一个悬挂器
+- 当套管顶深不为0，会给顶深增加一个悬挂器（程序强制添加）
+- 套管底部会增加一个套管头（程序强制添加）
 - 套管外径通常从上到下递减
+- 每层套管尺寸（外径）通常应当小于对应层段井筒尺寸（直径或内径）
 - 套管底深应小于等于对应井眼段的底深
 
 #### pilotHoleGuideLine（导眼井段）

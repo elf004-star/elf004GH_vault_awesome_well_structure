@@ -1,5 +1,5 @@
 """
-井身结构图生成器 MCP 服务
+awesome well structure MCP 服务（井身结构示意图MCP） 
 
 基于井数据生成井身结构图的服务
 """
@@ -17,21 +17,6 @@ from mcp.server.fastmcp import FastMCP
 
 # Create an MCP server
 mcp = FastMCP("awesome_well_MCP")
-
-
-def get_package_data_dir() -> Path:
-    """获取包数据目录路径"""
-    return Path(__file__).parent
-
-
-def get_generator_exe_path() -> Path:
-    """获取生成器exe文件路径"""
-    return get_package_data_dir() / "well_structure_generator.exe"
-
-
-def get_templates_dir() -> Path:
-    """获取模板文件目录路径"""
-    return get_package_data_dir() / "templates"
 
 
 def validate_well_data(data: Dict[str, Any]) -> bool:
@@ -60,7 +45,7 @@ def update_well_data_file(data: Dict[str, Any]) -> bool:
     """更新well_data.json文件"""
     try:
         # 创建备份
-        backup_path = Path("well_data_backup.json")
+        backup_path = Path("well_data_stadio.json")
         if Path("well_data.json").exists():
             shutil.copy2("well_data.json", backup_path)
         
@@ -77,9 +62,9 @@ def update_well_data_file(data: Dict[str, Any]) -> bool:
 def run_well_generator() -> bool:
     """启动井身结构生成器并检测PNG和报告文件生成"""
     try:
-        generator_path = get_generator_exe_path()
+        generator_path = Path("WellStructure.exe")
         if not generator_path.exists():
-            print(f"well_structure_generator.exe 不存在: {generator_path}")
+            print("WellStructure.exe 不存在")
             return False
         
         # 1. 启动前先清理所有生成的文件
@@ -122,7 +107,6 @@ def create_timestamp_folder() -> str:
         print(f"创建时间戳文件夹失败: {e}")
         return ""
 
-
 def move_generated_files(folder_path: str) -> bool:
     """按顺序移动生成的文件到时间戳文件夹"""
     try:
@@ -136,7 +120,7 @@ def move_generated_files(folder_path: str) -> bool:
         moved_files = []
         
         # 1. 移动PNG文件
-        png_files = ["well_structure_plot.png"]
+        png_files = ["well_info.png", "well_structure_plot.png"]
         for filename in png_files:
             source_file = Path(filename)
             if source_file.exists():
@@ -156,7 +140,8 @@ def move_generated_files(folder_path: str) -> bool:
             "drilling_fluid_pressure.csv",
             "drilling_fluid_pressure_raw.csv",
             "deviationData.csv",
-            "deviationData_raw.csv"
+            "deviationData_raw.csv",
+            "location.csv"
         ]
         for filename in csv_files:
             source_file = Path(filename)
@@ -167,7 +152,7 @@ def move_generated_files(folder_path: str) -> bool:
                 print(f"已移动CSV文件: {filename}")
         
         # 3. 移动JSON文件
-        json_files = ["well_data.json"]
+        json_files = ["well_data.json", "well_data_backup.json"]
         for filename in json_files:
             source_file = Path(filename)
             if source_file.exists():
@@ -202,7 +187,6 @@ def read_report_content(report_path: str) -> str:
     except Exception as e:
         print(f"读取报告内容失败: {e}")
         return ""
-
 
 def cleanup_generated_files():
     """清理指定的生成文件"""
@@ -242,14 +226,15 @@ def cleanup_generated_files():
                     print(f"删除CSV文件失败 {csv_file}: {e}")
         
         # 3. 清理指定的PNG文件
-        png_file = "well_structure_plot.png"
-        if os.path.exists(png_file):
-            try:
-                os.remove(png_file)
-                cleaned_count += 1
-                print(f"已删除PNG文件: {png_file}")
-            except Exception as e:
-                print(f"删除PNG文件失败 {png_file}: {e}")
+        png_files = ["well_structure_plot.png", "well_info.png"]
+        for png_file in png_files:
+            if os.path.exists(png_file):
+                try:
+                    os.remove(png_file)
+                    cleaned_count += 1
+                    print(f"已删除PNG文件: {png_file}")
+                except Exception as e:
+                    print(f"删除PNG文件失败 {png_file}: {e}")
         
         print(f"清理完成，共删除 {cleaned_count} 个文件")
         return True
@@ -258,12 +243,12 @@ def cleanup_generated_files():
         return False
 
 
-def wait_for_png_generation(max_attempts: int = 10) -> bool:
+def wait_for_png_generation(max_attempts: int = 36) -> bool:
     """检测PNG图片生成，每隔1秒检查一次"""
     try:
         print("开始检测PNG图片生成...")
         for attempt in range(max_attempts):
-            png_files = glob.glob("*.png")
+            png_files = glob.glob("well_structure_plot.png")
             if png_files:
                 print(f"检测到PNG图片生成: {png_files}")
                 print("exe程序启动成功")
@@ -279,7 +264,7 @@ def wait_for_png_generation(max_attempts: int = 10) -> bool:
         return False
 
 
-def wait_for_report_generation(max_attempts: int = 10) -> bool:
+def wait_for_report_generation(max_attempts: int = 36) -> bool:
     """检测报告文件生成，每隔1秒检查一次"""
     try:
         print("开始检测报告文件生成...")
@@ -312,10 +297,10 @@ def get_folder_absolute_path(folder_path: str) -> str:
         return ""
 
 
-def format_simple_response(image_path: str) -> str:
+def format_simple_response(structure_image_path: str, info_image_path: str) -> str:
     """简化的格式化回答"""
     try:
-        response = f"井身结构示意图为：\n![PNG]({image_path})"
+        response = f"井身结构示意图为：\n![PNG]({structure_image_path})\n\n井身结构信息图为：\n![PNG]({info_image_path})"
         return response
     except Exception as e:
         print(f"格式化回答失败: {e}")
@@ -326,7 +311,7 @@ def cleanup_temp_files():
     """清理临时文件"""
     try:
         # 清理备份文件
-        backup_path = Path("well_data_backup.json")
+        backup_path = Path("well_data_stadio.json")
         if backup_path.exists():
             backup_path.unlink()
     except Exception as e:
@@ -339,10 +324,12 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
     生成井身结构图
     
     Args:
-        well_data: 井数据JSON对象（必需）
-    
+        well_data: 井数据JSON对象（必需）。
+        其中`legendConfig` 配置项用于自定义井眼轨迹示意图的图例和样式。可以通过 `casingLegend`、`holeLegend`、`kickoffLegend` 和 `targetPointsLegend` 这几个选项，分别控制是否在绘图时显示套管、井筒、造斜点和靶点的说明。此外，`fill` 选项控制是否对套管与井筒之间的环空进行颜色填充，以直观地表示固井水泥；`simpleinfo` 选项控制是否采用简化的方式打印（输出为PNG图片）井身结构信息。\n\n**配置示例：**\n\n```json\n"legendConfig": {\n    "casingLegend": false,\n    "holeLegend": false,\n    "kickoffLegend": true,\n    "targetPointsLegend": true,\n    "fill": true,\n    "simpleinfo": false\n  }\n```\n\n上述配置将会在井身结构旁中显示造斜点和靶点的说明（图例说明），但隐藏套管和井筒的说明（备注说明），同时会对井筒与套管间的环空进行填充，打印出详细形式的井身结构信息（PNG）。
+        JSON对象中`pilotHoleGuideLine` 配置项用于导眼井辅助线、侧钻点的显示设置。可以通过 `topDepth_m` 和 `bottomDepth_m` 分别设置辅助线的顶深和底深（单位：米），使用 `diameter_mm` 设置其尺寸（单位：毫米），（前三项用户没有具体要求不进行设置，服务端会自动配置）。`display` 选项控制该辅助线是否显示，`highlight` 选项决定其是否以更明显的样式（黑色虚线）突出显示。最后，`side_tracking` 选项用于将关联的图例样式从“造斜点”切换为“侧钻点”。\n\n**配置示例：**\n\n```json\n"pilotHoleGuideLine": {\n    "display": true,\n    "highlight": true,\n    "side_tracking": true\n  }\n```\n\n上述配置将显示一条从 造斜点 到 井底、尺寸为默认毫米 的导眼井辅助线，并以高亮的黑色虚线样式呈现，同时其关联图例将显示为侧钻点样式。注意要显示侧钻点，必须先将 `legendConfig` 中的 `kickoffLegend` 设置为true（显示）。
+        
     Returns:
-        包含生成结果和图片数据的字典
+        包含生成结果和图片数据的字典，包含井身结构图片（PNG）文件路径、井身结构信息图片（PNG）文件路径的和详细生成过程信息等
     """
     try:
         # 验证数据
@@ -405,13 +392,14 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
             }
         
         # 构建图片绝对路径
-        image_path = f"{folder_absolute_path}\\well_structure_plot.png"
+        structure_image_path = f"{folder_absolute_path}\\well_structure_plot.png"
+        info_image_path = f"{folder_absolute_path}\\well_info.png"
         
         # 清理临时文件
         cleanup_temp_files()
         
         # 格式化简化回答
-        formatted_response = format_simple_response(image_path)
+        formatted_response = format_simple_response(structure_image_path, info_image_path)
         
         # 返回成功结果
         return {
@@ -425,7 +413,8 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
                 "total_depth": well_data.get("totalDepth_m", 0)
             },
             "archive_folder": timestamp_folder,
-            "image_path": image_path
+            "structure_image_path": structure_image_path,
+            "info_image_path": info_image_path
         }
         
     except Exception as e:
@@ -436,7 +425,6 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
             "details": str(e)
         }
 
-
 def main():
     """主入口函数"""
     mcp.run(transport='stdio')
@@ -444,3 +432,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
