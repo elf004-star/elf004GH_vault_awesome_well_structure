@@ -62,10 +62,20 @@ def update_well_data_file(data: Dict[str, Any]) -> bool:
 def run_well_generator() -> bool:
     """启动井身结构生成器并检测PNG和报告文件生成"""
     try:
+        # 首先尝试在当前目录查找
         generator_path = Path("WellStructure.exe")
         if not generator_path.exists():
-            print("WellStructure.exe 不存在")
-            return False
+            # 如果当前目录没有，尝试在包目录中查找
+            try:
+                import awesome_well_mcp
+                package_dir = Path(awesome_well_mcp.__file__).parent
+                generator_path = package_dir / "WellStructure.exe"
+                if not generator_path.exists():
+                    print("WellStructure.exe 不存在")
+                    return False
+            except ImportError:
+                print("WellStructure.exe 不存在")
+                return False
         
         # 1. 启动前先清理所有生成的文件
         print("清理现有生成文件...")

@@ -1,0 +1,80 @@
+{
+  "wellName": "资212井直改平",
+  "totalDepth_m": 5150,
+  "wellType": "horizontal well",
+  "deviationData": {
+    "kickoffPoint_m": null,
+    "deviationAngle_deg": 90,
+    "targetPointA_m": 5030,
+    "targetPointA_verticalDepth_m": 4826.55,
+    "targetPointB_m": 6805,
+    "DistanceAB_m": null,
+    "REAL_kickoffPoint_m": 4530
+  },
+  "stratigraphy": [
+    {"name": "遂宁组", "topDepth_m": 0, "bottomDepth_m": 45},
+    {"name": "沙溪庙组", "topDepth_m": 45, "bottomDepth_m": 1195},
+    {"name": "梁高山组", "topDepth_m": 1195, "bottomDepth_m": 1205},
+    {"name": "自流井组", "topDepth_m": 1205, "bottomDepth_m": 1525},
+    {"name": "须家河组", "topDepth_m": 1525, "bottomDepth_m": 2070},
+    {"name": "雷口坡组", "topDepth_m": 2070, "bottomDepth_m": 2305},
+    {"name": "嘉五-嘉三", "topDepth_m": 2305, "bottomDepth_m": 2600},
+    {"name": "嘉二-嘉一", "topDepth_m": 2600, "bottomDepth_m": 2895},
+    {"name": "飞仙关组", "topDepth_m": 2895, "bottomDepth_m": 3290},
+    {"name": "长兴组", "topDepth_m": 3290, "bottomDepth_m": 3395},
+    {"name": "龙潭组", "topDepth_m": 3395, "bottomDepth_m": 3495},
+    {"name": "茅口组", "topDepth_m": 3495, "bottomDepth_m": 3690},
+    {"name": "栖霞组", "topDepth_m": 3690, "bottomDepth_m": 3785},
+    {"name": "梁山组", "topDepth_m": 3785, "bottomDepth_m": 3790},
+    {"name": "宝塔组", "topDepth_m": 3790, "bottomDepth_m": 3830},
+    {"name": "十字铺组", "topDepth_m": 3830, "bottomDepth_m": 3860},
+    {"name": "湄潭组", "topDepth_m": 3860, "bottomDepth_m": 3975},
+    {"name": "桐梓组", "topDepth_m": 3975, "bottomDepth_m": 4015},
+    {"name": "洗象池组", "topDepth_m": 4015, "bottomDepth_m": 4155},
+    {"name": "高台组", "topDepth_m": 4155, "bottomDepth_m": 4270},
+    {"name": "龙王庙组", "topDepth_m": 4270, "bottomDepth_m": 4365},
+    {"name": "沧浪铺组", "topDepth_m": 4365, "bottomDepth_m": 4590},
+    {"name": "筇竹寺组", "topDepth_m": 4590, "bottomDepth_m": 5120},
+    {"name": "麦地坪组", "topDepth_m": 5120, "bottomDepth_m": 5150}
+  ],
+  "drillingFluidAndPressure": [
+    {"topDepth_m": 0, "bottomDepth_m": 50, "porePressure_gcm3": 1.00, "pressureWindow_gcm3": {"min": 1.05, "max": 1.10}},
+    {"topDepth_m": 50, "bottomDepth_m": 1205, "porePressure_gcm3": 1.00, "pressureWindow_gcm3": {"min": 1.07, "max": 1.15}},
+    {"topDepth_m": 1205, "bottomDepth_m": 1525, "porePressure_gcm3": 1.10, "pressureWindow_gcm3": {"min": 1.17, "max": 1.60}},
+    {"topDepth_m": 1525, "bottomDepth_m": 2070, "porePressure_gcm3": 1.45, "pressureWindow_gcm3": {"min": 1.52, "max": 1.60}},
+    {"topDepth_m": 2070, "bottomDepth_m": 2305, "porePressure_gcm3": 1.50, "pressureWindow_gcm3": {"min": 1.67, "max": 1.75}},
+    {"topDepth_m": 2305, "bottomDepth_m": 2600, "porePressure_gcm3": 1.60, "pressureWindow_gcm3": {"min": 1.67, "max": 1.75}},
+    {"topDepth_m": 2600, "bottomDepth_m": 4270, "porePressure_gcm3": 1.70, "pressureWindow_gcm3": {"min": 1.77, "max": 2.00}},
+    {"topDepth_m": 4270, "bottomDepth_m": 4365, "porePressure_gcm3": 1.65, "pressureWindow_gcm3": {"min": 1.77, "max": 2.00}},
+    {"topDepth_m": 4365, "bottomDepth_m": 4590, "porePressure_gcm3": 1.70, "pressureWindow_gcm3": {"min": 1.77, "max": 2.00}},
+    {"topDepth_m": 4590, "bottomDepth_m": 5150, "porePressure_gcm3": 1.90, "pressureWindow_gcm3": {"min": 1.97, "max": 2.15}}
+  ],
+  "wellboreStructure": {
+    "holeSections": [
+      {"topDepth_m": 0, "bottomDepth_m": 50, "diameter_mm": 660.4, "note_in": "26\""},
+      {"topDepth_m": 50, "bottomDepth_m": 700, "diameter_mm": 444.5, "note_in": "17 1/2\""},
+      {"topDepth_m": 700, "bottomDepth_m": 2600, "diameter_mm": 311.2, "note_in": "12 1/4\""},
+      {"topDepth_m": 2600, "bottomDepth_m": 6832, "diameter_mm": 215.9, "note_in": "8 1/2\""}
+    ],
+    "casingSections": [
+      {"topDepth_m": 0, "bottomDepth_m": 50, "od_mm": 508, "note_in": "20\""},
+      {"topDepth_m": 0, "bottomDepth_m": 698, "od_mm": 339.7, "note_in": "13 3/8\""},
+      {"topDepth_m": 0, "bottomDepth_m": 2600, "od_mm": 244.5, "note_in": "9 5/8\""},
+      {"topDepth_m": 0, "bottomDepth_m": 6827.72, "od_mm": 139.7, "note_in": "Φ149.2mm+Φ139.7mm"}
+    ],
+    "pilotHoleGuideLine": {
+      "topDepth_m": 4530,
+      "bottomDepth_m": 5150,
+      "diameter_mm": 215.9,
+      "display": true,
+      "highlight": true,
+      "side_tracking": true
+    }
+  },
+  "legendConfig": {
+    "casingLegend": true,
+    "holeLegend": false,
+    "kickoffLegend": true,
+    "targetPointsLegend": true
+  }
+}
