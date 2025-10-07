@@ -28,8 +28,10 @@ dist/
 
 # 忽略特定文件
 well_structure_report.md
-well_data.json
+well_data_sample.json
 
 # 排除不想被忽略的特定文件（注意要写相对路径）
 !统计结果模板.csv
-
+!well_structure_plot_sample.png
+!well_info_sample.png
+!well_data_sample.json

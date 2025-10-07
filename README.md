@@ -2,6 +2,16 @@
 
 这是一个基于 MCP (Model Context Protocol) 的井身结构图生成服务，可以根据井数据自动生成井身结构图。
 
+## 示例图片
+
+井身结构示意图绘制：
+
+![well_structure_plot_sample](https://cqchen.top/PicGO/well_structure_plot_sample.png)
+
+井身结构数据解析：
+
+![well_info_sample](https://cqchen.top/PicGO/well_info_sample.png)
+
 ## 功能特性
 
 - 支持四种基本井型：直井、水平井、定向井、直改平井，支持侧钻井转换
@@ -398,3 +408,6 @@ uv sync
 - `topDepth_m` 和 `bottomDepth_m` 定义导眼井段范围
 - `diameter_mm` 应与对应井眼段直径一致
 - `side_tracking: true` 表示侧钻井特征
+
+## Notice
+当前只发布了windows版

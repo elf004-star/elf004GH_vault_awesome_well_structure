@@ -8,7 +8,7 @@ dependencies = [
     "mcp[cli]>=1.16.0",
 ]
 authors = [
-    {name = "awesome-well-mcp team", email = "contact@awesome-well-mcp.com"}
+    {name = "awesome-well-mcp team", email = "1873475824@qq.com"}
 ]
 keywords = ["mcp", "well", "structure", "generator", "petroleum", "drilling"]
 classifiers = [
@@ -27,10 +27,10 @@ classifiers = [
 awesome-well-mcp = "awesome_well_mcp.main:main"
 
 [project.urls]
-Homepage = "https://github.com/awesome-well-mcp/awesome-well-mcp"
-Repository = "https://github.com/awesome-well-mcp/awesome-well-mcp"
-Documentation = "https://github.com/awesome-well-mcp/awesome-well-mcp#readme"
-Issues = "https://github.com/awesome-well-mcp/awesome-well-mcp/issues"
+Homepage = "https://github.com/elf004-star/elf004GH_vault_awesome_well_structure"
+Repository = "https://github.com/elf004-star/elf004GH_vault_awesome_well_structure"
+Documentation = "https://github.com/elf004-star/elf004GH_vault_awesome_well_structure#readme"
+Issues = "https://github.com/elf004-star/elf004GH_vault_awesome_well_structure/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -44,4 +44,3 @@ packages = ["src/awesome_well_mcp"]
 
 [tool.hatch.build.targets.wheel.include]
 "src/awesome_well_mcp/*.exe" = "awesome_well_mcp/"
-"src/awesome_well_mcp/templates/*.json" = "awesome_well_mcp/templates/"
