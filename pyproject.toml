@@ -1,6 +1,6 @@
 [project]
-name = "awesome-well-mcp"
-version = "1.0.3"
+name = "awesome_well_mcp"
+version = "2.0.0"
 description = "井身结构图生成器 MCP 服务 - 基于井数据自动生成井身结构图"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -8,7 +8,7 @@ dependencies = [
     "mcp[cli]>=1.16.0",
 ]
 authors = [
-    {name = "awesome-well-mcp team", email = "1873475824@qq.com"}
+    {name = "awesome_well_mcp team", email = "1873475824@qq.com"}
 ]
 keywords = ["mcp", "well", "structure", "generator", "petroleum", "drilling"]
 classifiers = [
@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 [project.scripts]
-awesome-well-mcp = "awesome_well_mcp.main:main"
+awesome_well_mcp = "awesome_well_mcp.main:main"
 
 [project.urls]
 Homepage = "https://github.com/elf004-star/elf004GH_vault_awesome_well_structure"

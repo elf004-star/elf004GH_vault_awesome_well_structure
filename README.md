@@ -50,12 +50,12 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```json
 {
   "mcpServers": {
-    "awesome-well-mcp": {
-      "name": "awesome-well-mcp",
+    "awesome_well_mcp": {
+      "name": "awesome_well_mcp",
       "type": "stdio",
       "command": "uvx",
       "args": [
-        "awesome-well-mcp"
+        "awesome_well_mcp"
       ]
     }
   }
@@ -126,8 +126,8 @@ uv sync
 ```json
 {
   "mcpServers": {
-    "awesome-well-mcp-local": {
-      "name": "awesome-well-mcp-local",
+    "awesome_well_mcp-local": {
+      "name": "awesome_well_mcp-local",
       "type": "stdio",
       "command": "uv",
       "args": [
