@@ -1,6 +1,10 @@
 # Awesome Well Structure MCP 服务
 
-这是一个基于 MCP (Model Context Protocol) 的井身结构图生成服务，可以根据井数据自动生成井身结构图。
+这是一个基于 MCP (Model Context Protocol)协议 的井身结构图生成工具，可以根据井数据自动生成井身结构图。由西南石油大学钻井所，何世明——汤明实验室团体提供技术支持。
+
+This service, powered by the Model Context Protocol (MCP), automatically generates borehole structure diagrams from well data. It is technically supported by the He Shiming and Tang Ming research group at the Drilling Research Institute of Southwest Petroleum University.
+
+问题反馈：1873475824@qq.com（陈春钱）
 
 ## 示例图片
 
@@ -144,7 +148,7 @@ uv sync
 工具名称：`generate_well_structure`
 
 参数：
-- `well_data`: 井数据JSON对象（必需）
+- `well_data`: (Dict[str, Any]): 井数据字典，必需。
 
 返回：
 - 成功时返回简化的图片路径（<1200 token，仅支持path格式）及生成报告字典。
@@ -159,7 +163,7 @@ uv sync
 ![PNG](文件夹绝对路径+well_info.png)
 ```
 
-**返回数据结构和服务实现的底层逻辑**：
+**返回数据结构**：
 ```json
 {
   "success": true,
@@ -176,12 +180,6 @@ uv sync
   "info_image_path": "井身结构信息图绝对路径"
 }
 ```
-
-**Token优化**：
-- 返回内容大幅简化，减少token消耗
-- 每次返回不超过1200个token
-- 移除冗长的报告内容，只保留核心信息
-- 同时生成井身结构图和井身结构信息图
 
 ### 支持的井型
 
@@ -212,7 +210,7 @@ uv sync
    - `DistanceAB_m: 有值`（AB点间距离）
    - `REAL_kickoffPoint_m: 有值`（实际造斜点）
 
-4. **直改平井** (`straight-to-horizontal well`)
+4. **直改平井**
    - `deviationAngle_deg: 90`
    - `kickoffPoint_m: 有值`（造斜点深度（可根据作图情况调整））
    - `targetPointA_m: 有值`（目标点A井深）
@@ -406,4 +404,4 @@ uv sync
 - `side_tracking: true` 表示侧钻井特征
 
 ## Notice
-当前只发布了windows版
+当前只发布了windows版，后续可能增加对Linux，OS系统的支持。
