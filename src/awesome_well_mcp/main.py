@@ -101,9 +101,9 @@ def run_well_generator() -> bool:
             print("报告文件生成检测失败")
             return False
         
-        # 5. 检测成功后等待1秒，然后继续
-        print("检测成功，等待1秒后继续...")
-        time.sleep(1)
+        # 5. 检测成功后等待6秒，然后继续
+        print("检测成功，等待6秒后继续...")
+        time.sleep(6)
         
         return True
     except Exception as e:
@@ -582,4 +582,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
