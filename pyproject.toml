@@ -1,6 +1,6 @@
 [project]
 name = "awesome_well_mcp"
-version = "2.2.0"
+version = "2.2.1"
 description = "井身结构图生成器 MCP 服务 - 基于井数据自动生成井身结构图"
 readme = "README.md"
 requires-python = ">=3.10"
