@@ -32,7 +32,7 @@ def validate_well_data(data: Dict[str, Any]) -> bool:
             return False
     
     # 验证井型
-    if data["wellType"] not in ["straight well", "deviated well", "horizontal well", "straight-to-horizontal well"]:
+    if data["wellType"] not in ["straight well", "deviated well", "horizontal well"]:
         return False
     
     # 验证深度数据
@@ -357,7 +357,6 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
                     - "straight well": 直井
                     - "deviated well": 定向井
                     - "horizontal well": 水平井
-                    - "straight-to-horizontal well": 直-水平井
                 stratigraphy (List[Dict]): 地层分层信息数组
                     - name (str): 地层名称
                     - topDepth_m (float): 顶深，单位：米
