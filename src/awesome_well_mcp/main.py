@@ -398,7 +398,7 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
                     - targetPointsLegend (bool): 是否显示靶点图例
                     - fill (bool): 是否填充套管-井筒环空
                     - simpleinfo (bool): 是否使用简化信息图
-                pilotHoleGuideLine (Dict): 导眼井辅助线配置
+                pilotHoleGuideLine (Dict): 导眼井辅助线配置，放置在wellboreStructure内。
                     - display (bool): 是否显示辅助线
                     - highlight (bool): 是否高亮显示
                     - side_tracking (bool): 是否标记为侧钻点
@@ -443,7 +443,7 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
     
     Examples:
         >>> well_data = {
-        ...     "wellName": "资101井",
+        ...     "wellName": "Well_Z101",
         ...     "totalDepth_m": 6900,
         ...     "wellType": "deviated well",
         ...     "deviationData": {
@@ -457,22 +457,42 @@ def generate_well_structure(well_data: Dict[str, Any]) -> Dict[str, Any]:
         ...     },
         ...     "stratigraphy": [
         ...         {"name": "遂宁组", "topDepth_m": 0, "bottomDepth_m": 150},
-        ...         {"name": "沙溪庙组", "topDepth_m": 150, "bottomDepth_m": 1112}
+        ...         {"name": "沙溪庙组", "topDepth_m": 150, "bottomDepth_m": 1112},
+        ...         ......
         ...     ],
         ...     "drillingFluidAndPressure": [
         ...         {"topDepth_m": 0, "bottomDepth_m": 150, 
         ...          "porePressure_gcm3": 1.085, 
-        ...          "pressureWindow_gcm3": {"min": 1.05, "max": 1.10}}
+        ...          "pressureWindow_gcm3": {"min": 1.05, "max": 1.10}},
+        ...          ......
         ...     ],
         ...     "wellboreStructure": {
         ...         "holeSections": [
         ...             {"topDepth_m": 0, "bottomDepth_m": 152, 
-        ...              "diameter_mm": 660.4, "note_in": "26\\""}
+        ...              "diameter_mm": 660.4, "note_in": "26\\""},
+        ...              ......
         ...         ],
         ...         "casingSections": [
         ...             {"topDepth_m": 0, "bottomDepth_m": 150.62, 
-        ...              "od_mm": 508, "note_in": "20\\"导管"}
-        ...         ]
+        ...              "od_mm": 508, "note_in": "20\\"导管"},
+        ...              ......
+        ...         ],
+        ...         "pilotHoleGuideLine": {
+        ...         "topDepth_m": 3060,
+        ...         "bottomDepth_m": 6900,
+        ...         "diameter_mm": 215.9,
+        ...         "display": true,
+        ...         "highlight": true,
+        ...         "side_tracking": true
+        ...         }
+        ...     },
+        ...     "legendConfig": {
+        ...     "casingLegend": false,
+        ...     "holeLegend": false,
+        ...     "kickoffLegend": true,
+        ...     "targetPointsLegend": true,
+        ...     "fill": false,
+        ...     "simpleinfo": true
         ...     }
         ... }
         >>> result = generate_well_structure(well_data)
